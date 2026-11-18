@@ -3,6 +3,14 @@
 > Nối tiếp Lab 8. Lab 8 trả lời "agent có chạy không"; Lab 9 trả lời **"làm sao biết bản mới tốt hơn — và chặn được bản tệ trước khi merge"**.
 > Không cần API key: MockLLM + judge replay. **Không Langfuse / OTel** (observability học ở Day 14).
 
+## Trạng thái triển khai
+
+Đã hoàn thiện M1–M7. Bằng chứng M5–M7 nằm trong [eval card](docs/eval_card.md): eval v2 có 28 item, A/A Δ = 0, mutation 3/3 với 0 báo nhầm và 4/4 trap bị chặn. Không sửa code Day 8, variant hoặc trap công khai.
+
+Tái hiện từ `src/`: `python -m scripts.check_advanced`; chạy test bằng `python -m pytest -q -m student -o addopts= -k lab9`. Script sinh report và ghi fingerprint nguồn; baseline v2 được commit để job `eval-gate-v2` thực sự chạy.
+
+Bảng [đối chiếu checkpoint M5/M6](docs/checkpoint_review.md) giải thích metric chặn chồng lấp và hai kiểm tra độc lập; sinh lại bằng `python -m scripts.check_checkpoint_evidence`. [Nội dung nộp LMS](docs/lms_submission.md) chứa link fork, PR và các bằng chứng cần gửi.
+
 ## Bạn sẽ làm gì (**bài cá nhân** · giờ trên lớp và hạn nộp theo ca làm bài, xem LMS của ca)
 Giờ trong bảng là của ca 13:30–17:00; ca khác dời các mốc tương ứng.
 

@@ -1,0 +1,3 @@
+# Eval-set fingerprints must be identical on Windows and Linux CI.
+src/data/eval/*.jsonl text eol=lf
+src/data/eval/labels_*.json text eol=lf
