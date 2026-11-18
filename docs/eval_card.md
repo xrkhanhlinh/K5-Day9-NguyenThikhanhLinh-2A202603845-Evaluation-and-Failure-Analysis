@@ -46,7 +46,9 @@ Giá trị an toàn là số trial vi phạm, không phải trung bình có th�
 | fixed | E-fixed-20261118-52d2 | 0 | cho qua |
 | seeded_regression | E-seeded_regression-20261118-52d2 | 1 | chặn |
 
-`ci_check` trả exit 0: baseline đúng shape swarm, cùng eval-set SHA và các metric khớp lần swarm độc lập hiện tại; metric M3 có grader đăng ký. Test Core: **52 passed, 317 deselected in 13.58s**. Smoke PASS; eval-set check 0 problem. `reports/m4_validation.json` chứa toàn bộ lệnh/exit/output thực chạy. Đây là xác nhận **tại máy**, không phải bằng chứng một job GitHub Actions đã xanh; trạng thái từ xa phải xem trên PR/Actions.
+`ci_check` trả exit 0: baseline đúng shape swarm, cùng eval-set SHA và các metric khớp lần swarm độc lập hiện tại; metric M3 có grader đăng ký. Test Core: **52 passed, 317 deselected in 13.58s**. Smoke PASS; eval-set check 0 problem. `reports/m4_validation.json` chứa toàn bộ lệnh/exit/output thực chạy **tại máy**.
+
+GitHub Actions đã **success** trên commit `e8f6394e27a36fce6e6741964cde08d110560dc8`: [workflow run](https://github.com/xrkhanhlinh/K5-Day9-NguyenThikhanhLinh-2A202603845-Evaluation-and-Failure-Analysis/actions/runs/44237085272). Bằng chứng gốc lưu ở `reports/github_ci_m4.json`; đối chiếu Checks của PR để xác nhận commit mới nhất trước merge.
 
 ## Judge, trace case và chẩn đoán M3
 

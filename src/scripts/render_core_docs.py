@@ -25,6 +25,18 @@ def main() -> int:
     seeds = "/".join(map(str, base["manifest"]["seeds"]))
     n_items, n_runs = base["manifest"]["items"], len(base["rows"])
     tone, helpful = judges["tone"], judges["helpful"]
+    ci_path = Path("reports/github_ci_m4.json")
+    ci_note = "Chưa có bằng chứng GitHub Actions trong report; cần xác nhận riêng trên PR/Actions."
+    owner_status = "Đã có bằng chứng local M0–M4, chờ xác nhận CI trên PR."
+    if ci_path.is_file():
+        remote = json.loads(ci_path.read_text(encoding="utf-8"))
+        if remote["conclusion"] != "success" or not any(
+                job["name"] == "eval-gate" and job["conclusion"] == "success" for job in remote["jobs"]):
+            raise ValueError("GitHub evidence does not show a successful Core gate")
+        ci_note = (f"GitHub Actions đã **success** trên commit `{remote['headSha']}`: "
+                   f"[workflow run]({remote['url']}). Bằng chứng gốc lưu ở `reports/github_ci_m4.json`; "
+                   "đối chiếu Checks của PR để xác nhận commit mới nhất trước merge.")
+        owner_status = "Đã xác nhận local M0–M4 và có workflow GitHub success; kiểm tra commit mới nhất trước merge."
     metric_rows = []
     prd_rows = []
     for metric in spec["metrics"]:
@@ -73,7 +85,9 @@ Giá trị an toàn là số trial vi phạm, không phải trung bình có th�
 |---|---|---|---|
 {chr(10).join(gate_rows)}
 
-`ci_check` trả exit 0: baseline đúng shape swarm, cùng eval-set SHA và các metric khớp lần swarm độc lập hiện tại; metric M3 có grader đăng ký. Test Core: **{test_output}**. Smoke PASS; eval-set check 0 problem. `reports/m4_validation.json` chứa toàn bộ lệnh/exit/output thực chạy. Đây là xác nhận **tại máy**, không phải bằng chứng một job GitHub Actions đã xanh; trạng thái từ xa phải xem trên PR/Actions.
+`ci_check` trả exit 0: baseline đúng shape swarm, cùng eval-set SHA và các metric khớp lần swarm độc lập hiện tại; metric M3 có grader đăng ký. Test Core: **{test_output}**. Smoke PASS; eval-set check 0 problem. `reports/m4_validation.json` chứa toàn bộ lệnh/exit/output thực chạy **tại máy**.
+
+{ci_note}
 
 ## Judge, trace case và chẩn đoán M3
 
@@ -139,7 +153,8 @@ Tiền và approval luôn chấm bằng code. Tone judge đạt κ/P/R trên rep
 - Lệnh: `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/baseline_v1.json --spec config/metric_spec.yaml`.
 - Baseline phải là swarm, cùng eval-set SHA và phủ đủ item × seed; sau khi nộp, baseline cần được commit trên nhánh main được bảo vệ. `ci_check` đối chiếu baseline với swarm CI để phát hiện baseline sai shape/metric.
 - Người giữ gate: **Nguyễn Thị Khánh Linh**. Exit 1 thì sửa lỗi rồi chạy lại; không sửa report hoặc nới ngưỡng để merge. Mọi ngoại lệ cần chủ repo phê duyệt có lý do và bằng chứng trên PR; tài liệu này không cấp sẵn waiver.
-- Kết quả local: swarm và fixed exit 0, seeded_regression exit 1; pass_rate Δ **{cases['seeded_regression']['paired_ci']['pass_rate']['delta']:+.3f}**, CI **[{cases['seeded_regression']['paired_ci']['pass_rate']['low']:+.3f}, {cases['seeded_regression']['paired_ci']['pass_rate']['high']:+.3f}]**. GitHub Actions phải được xác nhận riêng trên PR trước merge.
+- Kết quả local: swarm và fixed exit 0, seeded_regression exit 1; pass_rate Δ **{cases['seeded_regression']['paired_ci']['pass_rate']['delta']:+.3f}**, CI **[{cases['seeded_regression']['paired_ci']['pass_rate']['low']:+.3f}, {cases['seeded_regression']['paired_ci']['pass_rate']['high']:+.3f}]**.
+- {ci_note}
 
 ## 6. Bằng chứng còn thiếu
 
@@ -153,7 +168,7 @@ Tăng eval-set version khi thêm/sửa claim hoặc nhãn và sinh baseline mớ
 
 | Vai trò | Người phụ trách | Trạng thái |
 |---|---|---|
-| Eval owner | Nguyễn Thị Khánh Linh | Đã có bằng chứng local M0–M4, chờ xác nhận CI trên PR. |
+| Eval owner | Nguyễn Thị Khánh Linh | {owner_status} |
 | Product / pilot sản xuất | Chưa chỉ định | Chưa phê duyệt; không suy từ kết quả lab. |
 """
     pr_body = f"""## Core evaluation and regression gate

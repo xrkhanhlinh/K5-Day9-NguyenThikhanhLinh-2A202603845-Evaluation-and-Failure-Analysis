@@ -51,7 +51,8 @@ Tiền và approval luôn chấm bằng code. Tone judge đạt κ/P/R trên rep
 - Lệnh: `python -m lab9.gate --pr reports/eval_<shape>.json --baseline reports/baseline_v1.json --spec config/metric_spec.yaml`.
 - Baseline phải là swarm, cùng eval-set SHA và phủ đủ item × seed; sau khi nộp, baseline cần được commit trên nhánh main được bảo vệ. `ci_check` đối chiếu baseline với swarm CI để phát hiện baseline sai shape/metric.
 - Người giữ gate: **Nguyễn Thị Khánh Linh**. Exit 1 thì sửa lỗi rồi chạy lại; không sửa report hoặc nới ngưỡng để merge. Mọi ngoại lệ cần chủ repo phê duyệt có lý do và bằng chứng trên PR; tài liệu này không cấp sẵn waiver.
-- Kết quả local: swarm và fixed exit 0, seeded_regression exit 1; pass_rate Δ **-0.271**, CI **[-0.500, -0.057]**. GitHub Actions phải được xác nhận riêng trên PR trước merge.
+- Kết quả local: swarm và fixed exit 0, seeded_regression exit 1; pass_rate Δ **-0.271**, CI **[-0.500, -0.057]**.
+- GitHub Actions đã **success** trên commit `e8f6394e27a36fce6e6741964cde08d110560dc8`: [workflow run](https://github.com/xrkhanhlinh/K5-Day9-NguyenThikhanhLinh-2A202603845-Evaluation-and-Failure-Analysis/actions/runs/44237085272). Bằng chứng gốc lưu ở `reports/github_ci_m4.json`; đối chiếu Checks của PR để xác nhận commit mới nhất trước merge.
 
 ## 6. Bằng chứng còn thiếu
 
@@ -65,5 +66,5 @@ Tăng eval-set version khi thêm/sửa claim hoặc nhãn và sinh baseline mớ
 
 | Vai trò | Người phụ trách | Trạng thái |
 |---|---|---|
-| Eval owner | Nguyễn Thị Khánh Linh | Đã có bằng chứng local M0–M4, chờ xác nhận CI trên PR. |
+| Eval owner | Nguyễn Thị Khánh Linh | Đã xác nhận local M0–M4 và có workflow GitHub success; kiểm tra commit mới nhất trước merge. |
 | Product / pilot sản xuất | Chưa chỉ định | Chưa phê duyệt; không suy từ kết quả lab. |
