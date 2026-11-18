@@ -72,3 +72,5 @@ Tăng eval-set version khi thêm/sửa claim hoặc nhãn và sinh baseline mớ
 ## Mở rộng đánh giá v2
 
 Đã kiểm tra 28 item × 5 seed; spec 2.2 thêm `pass_hat_5` blocking với min 0.85, các slice denial/money_movement/adversarial và integrity/ratchet. A/A Δ = 0; mutation 3/3, không báo nhầm; 4/4 trap công khai bị chặn. Xem [eval card](eval_card.md#eval-v2--m5-m6-và-m7) và `reports/advanced_validation.json`. Không thay đổi tính năng agent hoặc phê duyệt pilot sản xuất.
+
+CI Core và Advanced đã success trên commit `89d86138c29fc3e0013a7446ca755c9e31e1196b`: [GitHub Actions](https://github.com/xrkhanhlinh/K5-Day9-NguyenThikhanhLinh-2A202603845-Evaluation-and-Failure-Analysis/actions/runs/44240656428).

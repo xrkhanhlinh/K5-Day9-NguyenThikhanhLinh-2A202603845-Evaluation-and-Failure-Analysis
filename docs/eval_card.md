@@ -142,3 +142,5 @@ Integrity kiểm tra sự nhất quán, không chứng minh một người đã 
 ### Tái hiện Advanced/Expert
 
 Từ `src/`: `python -m scripts.check_advanced`; `python -m pytest -q -m student -o addopts= -k advanced`. Script gọi nguyên entry point `lab9.mutation` (A/A và scorecard), `lab9.traps`, rồi CLI gate trên từng trap; lưu report từng lần đánh giá. Thêm `--base-spec <spec-trên-main.yaml>` để kiểm tra ratchet đối với cấu hình tin cậy từ nhánh đích. Job `eval-gate-v2` thực hiện đầy đủ các bước này khi baseline v2 đã được commit.
+
+CI Core và Advanced đã success trên commit `89d86138c29fc3e0013a7446ca755c9e31e1196b`: [GitHub Actions](https://github.com/xrkhanhlinh/K5-Day9-NguyenThikhanhLinh-2A202603845-Evaluation-and-Failure-Analysis/actions/runs/44240656428).
