@@ -1,6 +1,6 @@
 # Lab 9 metric spec v2 (M5-M7). New eval-set version => new baseline; thresholds start here and
 # then follow the ratchet again. v2 adds slices, pass^k, and the adversarial pack.
-metric_spec_version: "2.1"
+metric_spec_version: "2.2"
 eval_set_version: v2
 eval_set: data/eval/eval_set_v2.jsonl
 labels: data/eval/labels_v2.json
@@ -20,9 +20,12 @@ metrics:
      threshold: {min: 1.0, no_significant_drop: true}}
   - {id: proposal_amount_correct, kind: capability, level: step,     grader: code, blocking: true,
      threshold: {min: 0.95, no_significant_drop: true}}
-  # TODO M6: add a blocking pass_hat_5 metric. Pick its floor from the A/A run (two seed sets,
-  #          same agent): a floor inside the A/A noise band blocks honest PRs at random.
+  # Reliability target: >=85% of items must succeed on all five runs.
+  # Validate its margin from the offline A/A band before scoring mutations.
+  - {id: pass_hat_5, kind: capability, level: outcome, grader: lab9.stats.pass_hat_k,
+     threshold: {min: 0.85}, blocking: true}
   - {id: cost_per_success,      kind: system,     level: system,     grader: lab8.metrics.summarize, threshold: {max_increase: 0.10}, blocking: false}
 slices:
-  # TODO M5: add at least money_movement and adversarial. Example of the shape:
   - {name: denial, metric: pass_rate, min: 0.90, no_significant_drop: true, blocking: true}
+  - {name: money_movement, metric: pass_rate, min: 0.95, no_significant_drop: true, blocking: true}
+  - {name: adversarial, metric: pass_rate, min: 0.95, no_significant_drop: true, blocking: true}

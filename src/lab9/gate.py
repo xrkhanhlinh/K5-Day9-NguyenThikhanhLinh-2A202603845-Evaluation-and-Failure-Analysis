@@ -16,6 +16,7 @@ from pathlib import Path
 from lab8.console import utf8_stdio
 from lab9 import stats
 from lab9.eval import SPEC, load_spec, per_item
+from lab9.integrity import audit_reports
 
 
 def integrity_check(pr: dict, base: dict, spec: dict, base_spec: dict | None = None) -> list[str]:
@@ -33,8 +34,7 @@ def integrity_check(pr: dict, base: dict, spec: dict, base_spec: dict | None = N
         including dropping no_significant_drop)
       - an item's slice tags in PR rows differ from the baseline's (relabelling an item out of a
         slice hides its regression from the slice gate)"""
-    # TODO M7
-    return []
+    return audit_reports(pr, base, spec, base_spec)
 
 
 def slice_check(pr: dict, base: dict, spec: dict) -> tuple[list[str], list[str]]:
@@ -44,12 +44,41 @@ def slice_check(pr: dict, base: dict, spec: dict) -> tuple[list[str], list[str]]
       - fail if below "min", or if no_significant_drop and the paired CI over the slice's items
         lies entirely below 0
     Return (blocked ids like "slice:money_movement/pass_rate", report lines)."""
-    # TODO M5
-    return [], []
+    blocked, lines = [], []
+    bs = spec.get("bootstrap", {})
+    for entry in spec.get("slices", []):
+        name, metric = entry["name"], entry["metric"]
+        identifier = f"slice:{name}/{metric}"
+        a, b = per_item(pr, metric, name), per_item(base, metric, name)
+        value = sum(a.values()) / len(a) if a else None
+        failed = value is None or set(a) != set(b)
+        note = "missing/unpaired slice" if failed else ""
+        if value is not None:
+            failed |= "min" in entry and value < entry["min"]
+            failed |= "max" in entry and value > entry["max"]
+        if entry.get("no_significant_drop") and a and set(a) == set(b):
+            keys = sorted(a)
+            try:
+                d, lo, hi = stats.paired_bootstrap([a[k] for k in keys], [b[k] for k in keys],
+                    n_resamples=bs.get("n_resamples", 1000), rng=bs.get("rng", 2027),
+                    confidence=bs.get("confidence", 0.95))
+                note = f"delta {d:+.3f} CI [{lo:+.3f}, {hi:+.3f}]"
+                failed |= hi < 0
+            except ValueError as error:
+                failed = True
+                note = f"cannot estimate paired slice CI: {error}"
+        if failed and entry.get("blocking"):
+            blocked.append(identifier)
+        verdict = "BLOCK" if failed and entry.get("blocking") else ("warn" if failed else "ok")
+        lines.append(f"  {identifier:<38} {value!s:<8} n={len(a)} {note} {verdict}")
+    return blocked, lines
 
 
 def check(pr: dict, base: dict, spec: dict, base_spec: dict | None = None) -> tuple[list[str], list[str]]:
-    if pr["manifest"]["eval_set_sha"] != base["manifest"]["eval_set_sha"]:
+    if not isinstance(pr, dict) or not isinstance(base, dict):
+        return ["integrity"], ["  INTEGRITY report must be an object"]
+    if (isinstance(pr.get("manifest"), dict) and isinstance(base.get("manifest"), dict)
+            and pr["manifest"].get("eval_set_sha") != base["manifest"].get("eval_set_sha")):
         return ["eval_set_sha"], ["  EVAL SET differs from the baseline's: re-run the baseline on the same eval set"]
     problems = integrity_check(pr, base, spec, base_spec)
     if problems:
@@ -100,7 +129,9 @@ def main(argv: list[str] | None = None) -> int:
     base = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
     base_spec = load_spec(Path(args.base_spec)) if args.base_spec else None
     blocked, lines = check(pr, base, load_spec(Path(args.spec)), base_spec)
-    print(f"gate: PR {pr['run_id']} vs main {base['run_id']} · eval set {pr['manifest']['eval_set_sha']}")
+    def label(report):
+        return report.get("run_id", "unknown") if isinstance(report, dict) else "invalid"
+    print(f"gate: PR {label(pr)} vs main {label(base)}")
     print("\n".join(lines))
     if blocked:
         print(f"exit 1 — blocked: {', '.join(blocked)}")

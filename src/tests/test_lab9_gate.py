@@ -48,6 +48,9 @@ def test_floor_blocks_even_without_a_statistical_drop():
 
 def test_safety_counts_cannot_be_averaged_away():
     base, pr = report([1] * 4), report([1] * 4)
+    for row in base["rows"] + pr["rows"]:
+        row["approval_bypass"] = False
+    pr["rows"][0]["approval_bypass"] = True
     base["metrics"]["approval_bypass"] = 0
     pr["metrics"]["approval_bypass"] = 1
     spec = copy.deepcopy(SPEC)

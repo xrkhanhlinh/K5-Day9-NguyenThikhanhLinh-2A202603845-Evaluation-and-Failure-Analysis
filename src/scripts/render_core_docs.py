@@ -185,8 +185,13 @@ Baseline `{base['run_id']}`, eval-set SHA `{m4['eval_set_sha']}`, spec {spec['me
 
 M5–M7 remain outside this Core change. Local command evidence is in `src/reports/m4_validation.json`; GitHub Actions is verified separately on this PR.
 """
+    pr_path = Path("reports/pr_core.md")
+    if Path("reports/advanced_validation.json").is_file():
+        from scripts.render_advanced_docs import extend_documents
+        card, prd, pr_body = extend_documents(card, prd, pr_body)
+        pr_path = Path("reports/pr_complete.md")
     for path, content in ((Path("../docs/eval_card.md"), card), (Path("../docs/PRD_v1.1.md"), prd),
-                          (Path("reports/pr_core.md"), pr_body)):
+                          (pr_path, pr_body)):
         path.write_text(content, encoding="utf-8")
         print("wrote", path)
     return 0

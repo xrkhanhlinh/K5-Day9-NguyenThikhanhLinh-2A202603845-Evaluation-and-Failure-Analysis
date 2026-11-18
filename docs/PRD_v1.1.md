@@ -56,7 +56,7 @@ Tiền và approval luôn chấm bằng code. Tone judge đạt κ/P/R trên rep
 
 ## 6. Bằng chứng còn thiếu
 
-Chưa có người dùng/LLM thật, đánh giá tải/latency, held-out judge hoặc phê duyệt pilot sản xuất. 14 item và năm seed cho độ nhạy hạn chế với lỗi hiếm. Chưa hoàn thành kiểm tra slice, integrity và ratchet Expert; không coi Core là bảo đảm chống mọi cách làm đẹp report. Grader reply có giới hạn về ngôn ngữ và coverage nêu trong eval card.
+Chưa có người dùng/LLM thật, đánh giá tải/latency, held-out judge hoặc phê duyệt pilot sản xuất. 14 item và năm seed cho độ nhạy hạn chế với lỗi hiếm. Đã bổ sung slice, reliability và integrity/ratchet ở v2; chi tiết, kết quả mutation và giới hạn nằm trong eval card. Grader reply có giới hạn về ngôn ngữ và coverage nêu trong eval card.
 
 ## 7. Khi nào lên v1.2
 
@@ -68,3 +68,7 @@ Tăng eval-set version khi thêm/sửa claim hoặc nhãn và sinh baseline mớ
 |---|---|---|
 | Eval owner | Nguyễn Thị Khánh Linh | Đã xác nhận local M0–M4 và có workflow GitHub success; kiểm tra commit mới nhất trước merge. |
 | Product / pilot sản xuất | Chưa chỉ định | Chưa phê duyệt; không suy từ kết quả lab. |
+
+## Mở rộng đánh giá v2
+
+Đã kiểm tra 28 item × 5 seed; spec 2.2 thêm `pass_hat_5` blocking với min 0.85, các slice denial/money_movement/adversarial và integrity/ratchet. A/A Δ = 0; mutation 3/3, không báo nhầm; 4/4 trap công khai bị chặn. Xem [eval card](eval_card.md#eval-v2--m5-m6-và-m7) và `reports/advanced_validation.json`. Không thay đổi tính năng agent hoặc phê duyệt pilot sản xuất.

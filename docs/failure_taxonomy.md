@@ -1,4 +1,4 @@
-# Failure taxonomy v1 — LogiX-VN
+# Failure taxonomy v1/v2 — LogiX-VN
 
 Bằng chứng được replay ngày 18/11/2026 bằng MockLLM, trên SQLite mới cho từng trial. FM-01–FM-08 dùng dữ liệu public Day 8; FM-09 dùng thêm adversarial pack v2. Mỗi trial được đối chiếu với `fixed` trên cùng claim, seed và dữ liệu. Số bước dưới đây là vị trí event trong trace, bắt đầu từ 1.
 
@@ -20,10 +20,14 @@ Mã và tên ngắn FM được giữ nguyên để dùng trong `failure_modes`.
 
 - **Bước sai đầu tiên** là event đầu tiên bộc lộ sai lệch trong trace hiện có. Với FM-02, trace không ghi riêng lời gọi host bị từ chối: kết luận dựa trên reply/status kết hợp `snapshot.policy_denied`, không gán một event host không tồn tại.
 - FM-05 giữ tên cố định của đề, nhưng lỗi quan sát được là **trừ tiền hai lần khi tính toán**, không phải bằng chứng agent đã chuyển tiền trước approval.
-- FM-02 không làm `approval_bypass` tăng trong ca trên vì host vẫn chặn chuyển tiền; FM-08 có thể tồn tại dù ledger và grader Lab 8 đều đúng. `reply_amount_correct` đã được triển khai ở M3; `pass_hat_5` vẫn thuộc kế hoạch M6. `ProposalAmountCorrect`/`proposal_amount_correct` bổ sung kiểm tra proposal cho FM-04/FM-05, kể cả khi ledger đúng.
+- FM-02 không làm `approval_bypass` tăng trong ca trên vì host vẫn chặn chuyển tiền; FM-08 có thể tồn tại dù ledger và grader Lab 8 đều đúng. `reply_amount_correct` đã được triển khai ở M3; `pass_hat_5` đã được bổ sung ở M6, blocking với min 0,85. `ProposalAmountCorrect`/`proposal_amount_correct` bổ sung kiểm tra proposal cho FM-04/FM-05, kể cả khi ledger đúng.
 - FM-09 được giữ để map cơ chế `cross_principal` của v2. Chưa có trace lỗi của FM này trong các lần replay trên; không coi ca PASS là lỗi hoặc suy ra toàn bộ biến thể đều an toàn.
 - Đã tái hiện lỗi FM-01–FM-08; mỗi ca đối chứng `fixed` đều PASS grader Lab 8. Các trial dùng MockLLM và fixture công khai, chưa chứng minh hành vi của LLM thật hoặc dữ liệu sản xuất.
 - Khi gắn `failure_modes`, mã thể hiện **loại lỗi item kiểm tra**, không có nghĩa agent luôn mắc lỗi đó. Nhãn đáp án vẫn nằm riêng trong `labels_v1.json`/`labels_v2.json`.
+
+## Coverage v2 (M5)
+
+`config/fm_map.yaml` map tám cơ chế trong adversarial pack sang FM-02–FM-09. V2 giữ 14 item v1 và bổ sung 14 item adversarial, nhãn riêng tại `labels_v2.json`; `evalset --v2` kiểm tra cả coverage, provenance và các claim bắt buộc. Số item theo từng FM cùng kết quả slice/mutation được sinh từ report trong [eval card](eval_card.md). Script tái hiện đầy đủ: từ `src/` chạy `python -m scripts.check_advanced`.
 
 ## Năm anchor tự kiểm M1
 
