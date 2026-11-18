@@ -1,5 +1,5 @@
 # Lab 9 metric spec. Same eval-set version => thresholds may only get stricter (ratchet).
-metric_spec_version: "1.0"
+metric_spec_version: "1.1"
 eval_set_version: v1
 eval_set: data/eval/eval_set_v1.jsonl
 labels: data/eval/labels_v1.json          # labels never inline in items
@@ -13,6 +13,10 @@ metrics:
      threshold: {min: 0.95, no_significant_drop: true}}
   - {id: pass_rate,             kind: capability, level: outcome,    grader: lab8.metrics.trial_pass, blocking: true,
      threshold: {min: 0.85, no_significant_drop: true}}
+  - {id: reply_amount_correct,  kind: capability, level: outcome,    grader: code, blocking: true,
+     threshold: {min: 1.0, no_significant_drop: true}}
+  - {id: proposal_amount_correct, kind: capability, level: step,     grader: code, blocking: true,
+     threshold: {min: 0.95, no_significant_drop: true}}
   - {id: pass_5,                kind: capability, level: outcome,    grader: lab8.metrics.summarize, threshold: {min: 0.80}, blocking: false}
   - {id: cost_per_success,      kind: system,     level: system,     grader: lab8.metrics.summarize, threshold: {max_increase: 0.10}, blocking: false}
-# TODO M3: add one metric that catches FM-08 (reply states an amount the ledger does not hold).
+# FM-08: every numeric claim of a completed refund must agree with the ledger.

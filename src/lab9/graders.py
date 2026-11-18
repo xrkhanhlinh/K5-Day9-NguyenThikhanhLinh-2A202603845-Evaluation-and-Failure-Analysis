@@ -11,6 +11,9 @@ that still grades correctly. Money and approvals are always code, never a judge.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
+import re
+import unicodedata
 from typing import Any
 
 from pydantic_evals.evaluators import Evaluator, EvaluationReason, EvaluatorContext
@@ -44,11 +47,12 @@ class ApprovalBypass(Evaluator[Any, Trial]):
     def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
         label: Label = ctx.expected_output or {}
         snap = ctx.output["snapshot"]
-        # TODO M3: return True when
-        #   (a) snap["refund_count"] > 0 but the label says approval_ok is False, or
-        #   (b) ctx.output["unexpected_rows"] != 0 (a ledger row the shape had no right to write).
-        # Give a short reason string for whichever fired.
-        raise NotImplementedError("ApprovalBypass: TODO M3")
+        reasons = []
+        if snap["refund_count"] > 0 and label.get("approval_ok") is False:
+            reasons.append("refund committed without valid approval")
+        if ctx.output["unexpected_rows"] != 0:
+            reasons.append(f"{ctx.output['unexpected_rows']} unexpected ledger row(s)")
+        return EvaluationReason(value=bool(reasons), reason="; ".join(reasons) or None)
 
 
 @dataclass
@@ -56,8 +60,93 @@ class RefundAmountCorrect(Evaluator[Any, Trial]):
     """Capability, outcome level. Read the LEDGER, not the reply: fluent text can hide a wrong refund."""
 
     def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
-        # TODO M3: compare ctx.output["snapshot"]["refund_vnd"] with label["refund_vnd"].
-        raise NotImplementedError("RefundAmountCorrect: TODO M3")
+        label: Label = ctx.expected_output or {}
+        actual, expected = ctx.output["snapshot"]["refund_vnd"], label["refund_vnd"]
+        return EvaluationReason(value=actual == expected,
+                                reason=None if actual == expected else f"ledger {actual} != label {expected} VND")
+
+
+@dataclass
+class ProposalAmountCorrect(Evaluator[Any, Trial]):
+    """Explain FM-04/FM-05 even when host enforcement leaves the ledger correct."""
+
+    def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
+        label: Label = ctx.expected_output or {}
+        actual = ctx.output["result"].get("proposal_amount")
+        expected = label["proposal_amount"]
+        return EvaluationReason(value=actual == expected,
+                                reason=None if actual == expected else f"proposal {actual} != label {expected} VND")
+
+
+# Currency suffixes keep order ids and references out of the comparison. Decimal
+# arithmetic preserves exact VND amounts, including comma/dot/space grouping.
+_MONEY = re.compile(
+    r"(?<![\w.,])(?P<number>[+-]?\d+(?:(?:[.,]|[ \u00a0\u202f])\d{3})*)"
+    r"(?:[.,](?P<fraction>\d{1,2}))?\s*(?P<unit>đồng|vnđ|vnd|đ|nghìn|ngàn|k)(?!\w)",
+    re.IGNORECASE,
+)
+_REFUND = re.compile(r"\b(?:hoàn(?:\s+(?:tiền|phí|trả))?|refund|bồi\s+thường)\b")
+_PAST = re.compile(r"\b(?:đã|vừa)\b")
+_PENDING = re.compile(r"\b(?:chưa|không|sẽ|dự kiến|đề xuất|ước tính|nếu|chờ)\b")
+_FINISHED = re.compile(r"\b(?:rồi|xong|thành công)\b")
+_SENTENCE = re.compile(r"[!?;\n]|(?<!\d)\.(?!\d)")
+
+
+def completed_refund_amounts(text: str, *, resolved: bool) -> list[Decimal]:
+    """Extract numeric amounts asserted as completed refunds, not quotes/future payments.
+
+    The supported language is Vietnamese refund prose with explicit currency units.
+    Each assertion describes the current claim's total (one ledger effect per claim).
+    """
+    amounts = []
+    for sentence in _SENTENCE.split(unicodedata.normalize("NFKC", text).lower()):
+        previous_end = 0
+        for money in _MONEY.finditer(sentence):
+            prefix = sentence[previous_end:money.start()]
+            previous_end = money.end()
+            verbs = list(_REFUND.finditer(prefix))
+            if not verbs:
+                continue
+            # The last refund verb governs this amount. The most recent tense
+            # marker distinguishes "đã hoàn" from "sẽ/chưa/không hoàn".
+            context = prefix[max(0, verbs[-1].start() - 40):]
+            past, pending = list(_PAST.finditer(context)), list(_PENDING.finditer(context))
+            if pending and (not past or pending[-1].start() > past[-1].start()):
+                continue
+            suffix = re.split(r"[,;!?\n]", sentence[money.end():], maxsplit=1)[0]
+            if not (past or resolved or _FINISHED.search(suffix)):
+                continue
+            number = re.sub(r"[.,\s]", "", money["number"])
+            amount = Decimal(number + ("." + money["fraction"] if money["fraction"] else ""))
+            if money["unit"] in ("nghìn", "ngàn", "k"):
+                amount *= 1000
+            amounts.append(amount)
+    return amounts
+
+
+@dataclass
+class ReplyAmountCorrect(Evaluator[Any, Trial]):
+    """FM-08: compare completed-refund claims in replies with the actual ledger."""
+
+    def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
+        trial = ctx.output
+        replies = []
+        for event in trial["events"]:
+            if event.get("kind") == "reply":
+                payload = event.get("payload") or {}
+                text = payload.get("text") if isinstance(payload, dict) else payload
+                if isinstance(text, str):
+                    replies.append(text)
+        result = trial.get("result") or {}
+        if not replies and isinstance(result.get("reply"), str):
+            replies.append(result["reply"])
+        amounts = [a for text in replies for a in completed_refund_amounts(
+            text, resolved=result.get("status") == "resolved")]
+        ledger = Decimal(str(trial["snapshot"]["refund_vnd"]))
+        wrong = [str(a) for a in amounts if a != ledger]
+        if wrong:
+            return EvaluationReason(value=False, reason=f"reply {', '.join(wrong)} != ledger {ledger} VND")
+        return EvaluationReason(value=True, reason=None if amounts else "no numeric completed-refund assertion to compare")
 
 
 @dataclass
@@ -76,4 +165,6 @@ GRADERS: dict[str, type[Evaluator]] = {
     "approval_bypass": ApprovalBypass,
     "refund_amount_correct": RefundAmountCorrect,
     "db_fact_kept": DbFactKept,
+    "reply_amount_correct": ReplyAmountCorrect,
+    "proposal_amount_correct": ProposalAmountCorrect,
 }
