@@ -21,4 +21,6 @@ Làm thêm Advanced/Expert sau buổi: tiếp tục trên nhánh, mở PR mới 
 - [x] Mô tả PR: output `lab9.mutation` (scorecard + `--aa`) và 4 dòng `exit 1` của các trap
 - [x] `docs/eval_card.md` thêm mục v2: ngưỡng chọn từ A/A, slice nào bắt lỗi nào, và giới hạn cỡ mẫu (bug 1/3 seed không phát hiện ổn định với 5 seed)
 
-Bằng chứng triển khai M1–M7: `src/reports/advanced_validation.json`, `src/reports/github_ci_advanced.json` và [eval card](docs/eval_card.md). Các checklist ở trên đã kiểm tra bằng test công khai/local và CI; key anchor và bộ chấm ẩn của giảng viên chưa có trong repo. PR #1 vẫn cần merge vào `main` để nộp theo quy định; chưa thực hiện bước nộp LMS.
+Bằng chứng triển khai M1–M7: `src/reports/advanced_validation.json`, `src/reports/github_ci_advanced.json` và [eval card](docs/eval_card.md). Các checklist ở trên đã kiểm tra bằng test công khai/local và CI; key anchor và bộ chấm ẩn của giảng viên chưa có trong repo.
+
+Bằng chứng bổ sung M5/M6 ở [đối chiếu checkpoint](docs/checkpoint_review.md), sinh bằng script và được CI chạy lại. Nhánh nộp bài là `main` của fork; kiểm tra trạng thái merge tại [PR #1](https://github.com/xrkhanhlinh/K5-Day9-NguyenThikhanhLinh-2A202603845-Evaluation-and-Failure-Analysis/pull/1). Link và bản tổng hợp nằm tại [lms_submission.md](docs/lms_submission.md). Người học xác nhận đã nộp LMS ngày 18/11/2026; phần việc còn lại của phiên này là cập nhật repo và đưa bài hoàn thiện lên `main`.

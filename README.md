@@ -9,6 +9,8 @@
 
 Tái hiện từ `src/`: `python -m scripts.check_advanced`; chạy test bằng `python -m pytest -q -m student -o addopts= -k lab9`. Script sinh report và ghi fingerprint nguồn; baseline v2 được commit để job `eval-gate-v2` thực sự chạy.
 
+Bảng [đối chiếu checkpoint M5/M6](docs/checkpoint_review.md) giải thích metric chặn chồng lấp và hai kiểm tra độc lập; sinh lại bằng `python -m scripts.check_checkpoint_evidence`. [Nội dung nộp LMS](docs/lms_submission.md) chứa link fork, PR và các bằng chứng cần gửi.
+
 ## Bạn sẽ làm gì (**bài cá nhân** · giờ trên lớp và hạn nộp theo ca làm bài, xem LMS của ca)
 Giờ trong bảng là của ca 13:30–17:00; ca khác dời các mốc tương ứng.
 

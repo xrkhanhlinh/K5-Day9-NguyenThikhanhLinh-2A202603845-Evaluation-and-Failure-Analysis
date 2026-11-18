@@ -90,3 +90,4 @@ jobs:
           mkdir -p reports
           git show "$BASE_SHA:src/config/metric_spec_v2.yaml" > reports/base_metric_spec_v2.yaml
           python -m scripts.check_advanced --base-spec reports/base_metric_spec_v2.yaml
+          python -m scripts.check_checkpoint_evidence

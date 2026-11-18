@@ -1,0 +1,60 @@
+{
+  "eval_set_sha": "42be2c91e0c1",
+  "spec_sha256": "10214b7fc1d1c6d197cb1a83c520470ccaf30c93d0b64dad137a806e9ff6a552",
+  "cases": {
+    "slice_regression": {
+      "report": "reports/eval_slice_regression_v2.json",
+      "run_id": "E-slice_regression-20261118-42be",
+      "report_sha256": "4745f014c925bb33475bb025c8b43c14ef2610d9f64424ee2adc71e8238a5f6e",
+      "pass_rate": 0.9357,
+      "pass_rate_min": 0.85,
+      "pass_rate_floor_pass": true,
+      "global_pass_rate_blocked": false,
+      "paired_ci": {
+        "delta": -0.042857142857142705,
+        "low": -0.12142857142857155,
+        "high": 0.02857142857142858
+      },
+      "pass_hat_5": 0.8929,
+      "pass_hat_5_min": 0.85,
+      "blocked": [
+        "proposal_amount_correct",
+        "slice:money_movement/pass_rate",
+        "slice:adversarial/pass_rate"
+      ]
+    },
+    "flaky_regression": {
+      "report": "reports/eval_flaky_regression_v2.json",
+      "run_id": "E-flaky_regression-20261118-42be",
+      "report_sha256": "382578c258556313eb0a8d19011a8aa90e5618b7a6556ddd08e07e7817d360ad",
+      "pass_rate": 0.9143,
+      "pass_rate_min": 0.85,
+      "pass_rate_floor_pass": true,
+      "global_pass_rate_blocked": true,
+      "paired_ci": {
+        "delta": -0.06428571428571417,
+        "low": -0.1142857142857141,
+        "high": -0.014285714285714346
+      },
+      "pass_hat_5": 0.5714,
+      "pass_hat_5_min": 0.85,
+      "blocked": [
+        "pass_rate",
+        "proposal_amount_correct",
+        "pass_hat_5",
+        "slice:money_movement/pass_rate",
+        "slice:adversarial/pass_rate"
+      ]
+    }
+  },
+  "independent_tests": {
+    "node_ids": [
+      "tests/test_lab9_advanced_integrity.py::test_generic_slice_catches_regression_hidden_by_global_mean_and_ci",
+      "tests/test_lab9_advanced_integrity.py::test_reliability_blocks_even_when_global_mean_improves"
+    ],
+    "exit": 0,
+    "stdout": "..                                                                       [100%]\n2 passed in 2.71s\n",
+    "stderr": ""
+  },
+  "passed": true
+}
